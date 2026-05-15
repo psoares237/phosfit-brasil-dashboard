@@ -1,45 +1,67 @@
+import numpy as np
+import pandas as pd
+import streamlit as st
+
+from utils.formatters import MESES_PT
 
 
-def grouped_sales(df: pd.DataFrame, dimension: str) -> pd.DataFrame:
-    out = (
-        df.groupby(dimension, as_index=False)
-        .agg(
-            Receita=("Receita", "sum"),
-            Lucro=("Lucro", "sum"),
-            Custo=("Custo", "sum"),
-            Pedidos=("ID_Pedido", "nunique"),
-            Quantidade=("Quantidade", "sum"),
-            Desconto_Medio=("Desconto_Pct", "mean"),
-            Frete_Medio=("Frete", "mean"),
-        )
-        .sort_values("Receita", ascending=False)
+@st.cache_data
+def load_data(file_path: str) -> pd.DataFrame:
+    data = pd.read_excel(file_path)
+    data["Data"] = pd.to_datetime(data["Data"], errors="coerce")
+    data = data.dropna(subset=["Data"]).copy()
+
+    numeric_cols = [
+        "Quantidade",
+        "Preco_Unitario",
+        "Desconto_Pct",
+        "Valor_Total",
+        "Custo_Total",
+        "Lucro",
+        "Frete",
+    ]
+
+    for col in numeric_cols:
+        data[col] = pd.to_numeric(data[col], errors="coerce").fillna(0)
+
+    data["Mes"] = data["Data"].dt.to_period("M")
+    data["Ano"] = data["Data"].dt.year
+    data["MesNumero"] = data["Data"].dt.month
+    data["MesNome"] = data["MesNumero"].map(MESES_PT)
+
+    data["Receita"] = data["Valor_Total"]
+    data["Custo"] = data["Custo_Total"]
+
+    data["Margem"] = np.where(
+        data["Receita"] != 0,
+        data["Lucro"] / data["Receita"] * 100,
+        0,
     )
-    out["Margem"] = np.where(out["Receita"] != 0, out["Lucro"] / out["Receita"] * 100, 0)
-    out["Lucro_Liquido"] = out["Lucro"] - out["Frete_Medio"] * out["Pedidos"]
-    return out
 
-
-def monthly_sales(df: pd.DataFrame) -> pd.DataFrame:
-    monthly = (
-        df.groupby("Mes", as_index=False)
-        .agg(
-            Receita=("Receita", "sum"),
-            Lucro=("Lucro", "sum"),
-            Custo=("Custo", "sum"),
-            Pedidos=("ID_Pedido", "nunique"),
-            Quantidade=("Quantidade", "sum"),
-            Frete=("Frete", "sum"),
-            Desconto_Medio=("Desconto_Pct", "mean"),
-        )
-        .sort_values("Mes")
+    data["Desconto_Rate"] = np.where(
+        data["Desconto_Pct"] > 1,
+        data["Desconto_Pct"] / 100,
+        data["Desconto_Pct"],
     )
-    monthly["Data"] = monthly["Mes"].dt.to_timestamp()
-    monthly["Margem"] = np.where(monthly["Receita"] != 0, monthly["Lucro"] / monthly["Receita"] * 100, 0)
-    monthly["Lucro_Liquido"] = monthly["Lucro"] - monthly["Frete"]
-    monthly["Acumulado_Receita"] = monthly["Receita"].cumsum()
-    monthly["Acumulado_Lucro"] = monthly["Lucro"].cumsum()
-    monthly["MoM_Receita"] = monthly["Receita"].pct_change() * 100
-    monthly["MoM_Lucro"] = monthly["Lucro"].pct_change() * 100
-    monthly["Ano"] = monthly["Data"].dt.year
-    monthly["MesNumero"] = monthly["Data"].dt.month
-    return monthly
+
+    data["Desconto_Rate"] = data["Desconto_Rate"].clip(lower=0, upper=0.95)
+
+    data["Preco_Bruto_Estimado"] = np.where(
+        data["Desconto_Rate"] < 1,
+        data["Receita"] / (1 - data["Desconto_Rate"]),
+        data["Receita"],
+    )
+
+    data["Desconto_Valor_Estimado"] = (
+        data["Preco_Bruto_Estimado"] - data["Receita"]
+    ).clip(lower=0)
+
+    data["Lucro_Liquido_Estimado"] = data["Lucro"] - data["Frete"]
+
+    data["Margem_Liquida_Estimada"] = np.where(
+        data["Receita"] != 0,
+        data["Lucro_Liquido_Estimado"] / data["Receita"] * 100,
+        0,
+    )
+
+    return data
