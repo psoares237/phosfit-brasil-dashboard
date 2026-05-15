@@ -20,6 +20,8 @@ from services.data_service import load_data
 from services.analytics_service import grouped_sales, monthly_sales
 from components.ui import metric_card, render_kpis, section_header, chart_block
 from components.charts import clean_figure
+from services.analytics_service import grouped_sales, monthly_sales, top_share
+from pages.overview import render as render_overview
 
 st.set_page_config(
     page_title="PHOSFit Brasil Dashboard",
@@ -75,15 +77,6 @@ def clean_figure(fig: go.Figure) -> go.Figure:
     )
 
     return fig
-
-
-def top_share(df: pd.DataFrame, column: str) -> tuple[str, float]:
-    grouped = df.groupby(column, as_index=False)["Receita"].sum().sort_values("Receita", ascending=False)
-    if grouped.empty:
-        return "Sem dados", 0
-    top_name = grouped.iloc[0][column]
-    share = grouped.iloc[0]["Receita"] / grouped["Receita"].sum() * 100 if grouped["Receita"].sum() else 0
-    return str(top_name), share
 
 
 def monetary_tooltip(prefix="R$ "):
@@ -350,58 +343,15 @@ tabs = st.tabs(tab_labels)
 
 
 with tabs[0]:
-    section_header(
-        "Introdução",
-        "Visao geral do painel, resumo dos KPIs e leitura executiva da base real.",
-    )
-
     intro_kpis = [
         ("Receita Total", fmt_currency(current_total["receita"]), pct_change(current_total["receita"], previous_total["receita"]), "período anterior"),
         ("Lucro Total", fmt_currency(current_total["lucro"]), pct_change(current_total["lucro"], previous_total["lucro"]), "período anterior"),
-        ("Margem de Lucro", fmt_pct((current_total["lucro"] / current_total["receita"] * 100) if current_total["receita"] else 0), pct_change((current_total["lucro"] / current_total["receita"] * 100) if current_total["receita"] else 0, (previous_total["lucro"] / previous_total["receita"] * 100) if previous_total["receita"] else None), "período anterior"),
-        ("Ticket Médio", fmt_currency(current_total["receita"] / current_total["pedidos"] if current_total["pedidos"] else 0), pct_change((current_total["receita"] / current_total["pedidos"] if current_total["pedidos"] else 0), (previous_total["receita"] / previous_total["pedidos"] if previous_total["pedidos"] else 0)), "período anterior"),
+        ("Margem de Lucro", fmt_pct((current_total["lucro"] / current_total["receita"] * 100) if current_total["receita"] else 0), None, "período anterior"),
+        ("Ticket Médio", fmt_currency(current_total["receita"] / current_total["pedidos"] if current_total["pedidos"] else 0), None, "período anterior"),
         ("Total de Pedidos", fmt_int(current_total["pedidos"]), pct_change(current_total["pedidos"], previous_total["pedidos"]), "período anterior"),
     ]
-    render_kpis(intro_kpis)
 
-    col_a, col_b = st.columns(2)
-    with col_a:
-        fig = px.line(monthly, x="Data", y="Receita", markers=True)
-        fig.add_scatter(x=monthly["Data"], y=monthly["Lucro"], mode="lines+markers", name="Lucro", line=dict(color="#2dd4bf", width=3))
-        fig.update_traces(line=dict(color="#60a5fa", width=3), name="Receita", selector=dict(name=""))
-        fig.update_layout(height=360, hovermode="x unified", legend=dict(orientation="h", y=1.02, x=0))
-        fig.update_yaxes(tickprefix="R$ ")
-        clean_figure(fig)
-        chart_block(
-            "Evolução mensal de Receita e Lucro",
-            "Resumo visual da operação ao longo do período filtrado.",
-            fig,
-        )
-    with col_b:
-        fig = px.bar(cat.head(8), x="Receita", y="Categoria", orientation="h", text_auto=".2s")
-        fig.update_traces(hovertemplate="Categoria: %{y}<br>Receita: R$ %{x:,.2f}<extra></extra>")
-        fig.update_layout(height=360, showlegend=False)
-        fig.update_xaxes(tickprefix="R$ ")
-        clean_figure(fig)
-        chart_block(
-            "Categorias que mais geram receita",
-            "Leitura rápida de concentração comercial por categoria.",
-            fig,
-        )
-
-    st.markdown(
-        """
-        <div class="callout">
-            <div class="callout-title">Como ler este painel</div>
-            <div>
-                As análises usam apenas a base carregada. Onde o dado não existe hoje
-                (como ID de cliente, conversão ou churn), o dashboard mostra apenas a
-                recomendação de evolução futura, sem inventar indicador.
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    render_overview(intro_kpis)
 
 
 with tabs[1]:
