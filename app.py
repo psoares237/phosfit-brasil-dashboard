@@ -19,6 +19,7 @@ from utils.formatters import (
 from services.data_service import load_data
 from services.analytics_service import grouped_sales, monthly_sales
 from components.ui import metric_card, render_kpis, section_header, chart_block
+from components.charts import clean_figure
 
 st.set_page_config(
     page_title="PHOSFit Brasil Dashboard",
@@ -85,15 +86,11 @@ def top_share(df: pd.DataFrame, column: str) -> tuple[str, float]:
     return str(top_name), share
 
 
-
-
-
 def monetary_tooltip(prefix="R$ "):
     return dict(tickprefix=prefix)
 
 
 @st.cache_data
-
 
 
 def metric_card(title: str, value: str, delta: float | None, delta_label: str) -> None:
