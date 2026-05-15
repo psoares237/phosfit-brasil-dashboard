@@ -7,7 +7,14 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import streamlit as st
 from pathlib import Path
-
+from utils.formatters import (
+    MESES_PT,
+    month_label,
+    fmt_currency,
+    fmt_int,
+    fmt_pct,
+    pct_change,
+)
 
 st.set_page_config(
     page_title="PHOSFit Brasil Dashboard",
@@ -19,33 +26,6 @@ st.set_page_config(
 
 theme_path = Path("assets/theme.css")
 st.markdown(theme_path.read_text(encoding="utf-8"), unsafe_allow_html=True)
-
-
-
-MESES_PT = {
-    1: "Jan",
-    2: "Fev",
-    3: "Mar",
-    4: "Abr",
-    5: "Mai",
-    6: "Jun",
-    7: "Jul",
-    8: "Ago",
-    9: "Set",
-    10: "Out",
-    11: "Nov",
-    12: "Dez",
-}
-
-
-def month_label(dt: pd.Timestamp) -> str:
-    return f"{MESES_PT[dt.month]}/{dt.year}"
-
-
-
-
-
-
 
 
 def metric_card(title: str, value: str, delta: float | None, delta_label: str) -> None:
@@ -249,44 +229,6 @@ def load_data(file_path: str) -> pd.DataFrame:
     )
 
     return data
-
-MESES_PT = {
-    1: "Jan",
-    2: "Fev",
-    3: "Mar",
-    4: "Abr",
-    5: "Mai",
-    6: "Jun",
-    7: "Jul",
-    8: "Ago",
-    9: "Set",
-    10: "Out",
-    11: "Nov",
-    12: "Dez",
-}
-
-
-def month_label(dt: pd.Timestamp) -> str:
-    return f"{MESES_PT[dt.month]}/{dt.year}"
-
-
-def fmt_currency(value: float) -> str:
-    return f"R$ {value:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-
-
-def fmt_int(value: float) -> str:
-    return f"{int(round(value)):,}".replace(",", ".")
-
-
-def fmt_pct(value: float) -> str:
-    return f"{value:.1f}%".replace(".", ",")
-
-
-def pct_change(current: float, previous: float) -> float | None:
-    if previous in (0, None) or pd.isna(previous):
-        return None
-
-    return ((current - previous) / abs(previous)) * 100
 
 
 def metric_card(title: str, value: str, delta: float | None, delta_label: str) -> None:
