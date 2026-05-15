@@ -1,288 +1,244 @@
-
 <style>
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 :root {
-
     --bg: #07111F;
     --bg-soft: #0B1628;
-
     --panel: #101826;
     --panel-2: #132033;
-
     --text: #F7FAFC;
     --muted: #AAB7C4;
-
     --border: rgba(255,255,255,0.10);
-
     --green: #7EE787;
     --blue: #1E6BFF;
     --blue-soft: #60A5FA;
-
     --gold: #D6B25E;
     --gold-soft: #F3DFA2;
-
     --red: #F87171;
 }
 
 html,
 body,
 [class*="css"] {
-
     font-family: 'Inter', system-ui, sans-serif;
 }
 
 .stApp {
-
     background:
         radial-gradient(circle at top left, rgba(126,231,135,0.14), transparent 28%),
         radial-gradient(circle at top right, rgba(30,107,255,0.18), transparent 30%),
         radial-gradient(circle at bottom right, rgba(214,178,94,0.10), transparent 26%),
         linear-gradient(180deg, #07111F 0%, #0B1628 52%, #07111F 100%);
-
     color: var(--text);
 }
 
 section[data-testid="stSidebar"] {
-
     background:
         linear-gradient(
             180deg,
             rgba(10,22,40,0.98),
             rgba(7,17,31,0.98)
         );
-
     border-right: 1px solid var(--border);
 }
 
 .block-container {
-
     padding-top: 1.2rem;
     padding-bottom: 2rem;
 }
 
 .hero {
-
     position: relative;
-
     overflow: hidden;
-
     padding: 1.6rem 1.7rem;
-
     border: 1px solid rgba(214,178,94,0.22);
-
     border-radius: 24px;
-
     background:
         linear-gradient(
             135deg,
             rgba(16,24,38,0.96),
             rgba(11,22,40,0.96)
         );
-
-    box-shadow:
-        0 24px 60px rgba(0,0,0,0.32);
-
+    box-shadow: 0 24px 60px rgba(0,0,0,0.32);
     margin-bottom: 1rem;
 }
 
 .hero h1 {
-
     margin: 0;
-
     font-size: 2.25rem;
-
     letter-spacing: -0.04em;
-
     color: var(--text);
-
     font-weight: 900;
 }
 
 .hero p {
-
     margin: 0.55rem 0 0;
-
     color: var(--muted);
-
     font-size: 0.98rem;
-
     line-height: 1.6;
-
     max-width: 920px;
 }
 
 .metric-card {
-
     background:
         linear-gradient(
             180deg,
             rgba(19,32,51,0.98),
             rgba(12,22,38,0.98)
         );
-
     border: 1px solid rgba(255,255,255,0.09);
-
     border-radius: 20px;
-
     padding: 1rem 1rem 0.95rem;
-
-    box-shadow:
-        0 18px 38px rgba(0,0,0,0.22);
-
+    box-shadow: 0 18px 38px rgba(0,0,0,0.22);
     min-height: 116px;
 }
 
 .metric-title {
-
     color: var(--muted);
-
     font-size: 0.78rem;
-
     text-transform: uppercase;
-
     letter-spacing: 0.10em;
-
     margin-bottom: 0.5rem;
 }
 
 .metric-value {
-
     color: var(--text);
-
     font-size: 1.42rem;
-
     font-weight: 900;
-
     letter-spacing: -0.035em;
-
     line-height: 1.15;
 }
 
 .metric-delta {
-
     margin-top: 0.55rem;
-
     font-size: 0.9rem;
-
     font-weight: 700;
 }
 
 .metric-delta.up {
-
     color: var(--green);
 }
 
 .metric-delta.down {
-
     color: var(--red);
 }
 
 .metric-delta.flat {
-
     color: var(--gold-soft);
 }
 
-.chart-card {
-
-    background:
-        linear-gradient(
-            180deg,
-            rgba(19,32,51,0.96),
-            rgba(12,22,38,0.98)
-        );
-
-    border: 1px solid rgba(255,255,255,0.09);
-
-    border-radius: 20px;
-
-    padding: 1rem 1rem 0.55rem;
-
-    box-shadow:
-        0 18px 40px rgba(0,0,0,0.20);
-
-    margin-bottom: 1rem;
-}
-
-.section-card {
-
+.chart-card,
+.section-card,
+.callout,
+.filter-panel {
     background:
         linear-gradient(
             135deg,
             rgba(19,32,51,0.96),
             rgba(11,22,40,0.98)
         );
-
     border: 1px solid rgba(214,178,94,0.18);
-
     border-radius: 20px;
+    box-shadow: 0 18px 38px rgba(0,0,0,0.18);
+}
 
-    padding: 1rem 1.1rem 0.9rem;
-
-    box-shadow:
-        0 18px 38px rgba(0,0,0,0.18);
-
+.chart-card {
+    padding: 1rem 1rem 0.55rem;
     margin-bottom: 1rem;
 }
 
-.chart-title {
+.section-card {
+    padding: 1rem 1.1rem 0.9rem;
+    margin-bottom: 1rem;
+}
 
-    font-size: 1rem;
-
-    font-weight: 800;
-
+.callout {
+    padding: 0.95rem 1.05rem;
     color: var(--text);
+    line-height: 1.6;
+    margin-top: 1rem;
+}
 
+.chart-title {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--text);
     margin-bottom: 0.22rem;
 }
 
 .chart-subtitle {
-
     color: var(--muted);
-
     font-size: 0.88rem;
-
     margin-bottom: 0.75rem;
-
     line-height: 1.45;
 }
 
-.callout {
+.filter-panel {
+    padding: 1rem 1.1rem;
+    margin: 0.8rem 0 1rem 0;
+}
 
-    background:
-        linear-gradient(
-            135deg,
-            rgba(30,107,255,0.10),
-            rgba(126,231,135,0.06)
-        );
-
-    border: 1px solid rgba(214,178,94,0.18);
-
-    border-radius: 16px;
-
-    padding: 0.95rem 1.05rem;
-
+.filter-title {
     color: var(--text);
+    font-weight: 900;
+    font-size: 1.05rem;
+    letter-spacing: -0.02em;
+}
 
-    line-height: 1.6;
-
-    box-shadow:
-        0 16px 34px rgba(0,0,0,0.16);
-
-    margin-top: 1rem;
+.filter-subtitle {
+    color: var(--muted);
+    font-size: 0.88rem;
+    margin-top: 0.25rem;
 }
 
 div[data-testid="stTabs"] button {
-
     color: var(--muted);
-
     font-weight: 700;
 }
 
 div[data-testid="stTabs"] button[aria-selected="true"] {
-
     color: var(--gold-soft);
+}
+
+/* SELECTBOX PREMIUM */
+
+div[data-baseweb="select"] > div {
+    background-color: rgba(19,32,51,0.95) !important;
+    border: 1px solid rgba(214,178,94,0.22) !important;
+    border-radius: 14px !important;
+    min-height: 46px !important;
+    color: #F7FAFC !important;
+}
+
+div[data-baseweb="select"] input,
+div[data-baseweb="select"] span {
+    color: #F7FAFC !important;
+}
+
+div[data-baseweb="select"] svg {
+    display: block !important;
+    fill: #D6B25E !important;
+}
+
+div[data-baseweb="select"],
+div[data-baseweb="select"] * {
+    cursor: pointer !important;
+}
+
+/* MÉTRICAS DO PAINEL DE FILTROS */
+
+div[data-testid="stMetric"] {
+    background:
+        linear-gradient(
+            180deg,
+            rgba(19,32,51,0.98),
+            rgba(12,22,38,0.98)
+        );
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 18px;
+    padding: 0.9rem 1rem;
+    box-shadow: 0 14px 30px rgba(0,0,0,0.18);
 }
 
 </style>

@@ -244,6 +244,11 @@ anos_disponiveis = sorted(data["Ano"].dropna().astype(int).unique().tolist())
 
 opcoes_ano = ["Todos"] + anos_disponiveis
 
+st.sidebar.markdown("## PHOSFit Brasil")
+st.sidebar.caption("Dashboard Executivo de Performance")
+st.sidebar.markdown("---")
+st.sidebar.markdown("### Filtros")
+
 opcao_ano = st.sidebar.selectbox(
     "Ano",
     options=opcoes_ano,
@@ -264,11 +269,15 @@ if current_df.empty:
 
 monthly = monthly_sales(current_df)
 prev_monthly = monthly_sales(previous_df) if not previous_df.empty else pd.DataFrame()
+
 seasonality = (
-    data.groupby("MesNumero", as_index=False)["Receita"].mean().sort_values("MesNumero")
+    data.groupby("MesNumero", as_index=False)["Receita"]
+    .mean()
+    .sort_values("MesNumero")
     if not data.empty
     else pd.DataFrame(columns=["MesNumero", "Receita"])
 )
+
 seasonality["MesNome"] = seasonality["MesNumero"].map(MESES_PT)
 
 current_total = {
@@ -290,6 +299,37 @@ previous_total = {
     "frete": previous_df["Frete"].sum(),
     "desconto_medio": previous_df["Desconto_Pct"].mean(),
 }
+
+st.sidebar.markdown("---")
+st.sidebar.markdown("### Resumo do Período")
+
+st.sidebar.metric(
+    "Receita",
+    fmt_currency(current_total["receita"]),
+)
+
+st.sidebar.metric(
+    "Lucro",
+    fmt_currency(current_total["lucro"]),
+)
+
+st.sidebar.metric(
+    "Pedidos",
+    fmt_int(current_total["pedidos"]),
+)
+
+st.sidebar.metric(
+    "Margem",
+    fmt_pct(
+        current_total["lucro"] / current_total["receita"] * 100
+        if current_total["receita"]
+        else 0
+    ),
+)
+
+st.sidebar.markdown("---")
+st.sidebar.success("Base carregada com sucesso")
+
 
 start_label = current_df["Data"].min().strftime("%d/%m/%Y")
 end_label = current_df["Data"].max().strftime("%d/%m/%Y")
@@ -365,7 +405,6 @@ with tabs[0]:
 
     render_overview(intro_kpis)
 
-
 with tabs[1]:
     render_revenue(
         monthly,
@@ -410,7 +449,6 @@ with tabs[4]:
         vendedor,
     )
 
-
 with tabs[5]:
     render_costs(
         current_df,
@@ -420,7 +458,6 @@ with tabs[5]:
         canal,
         monthly,
     )
-
 
 with tabs[6]:
     render_geography(
@@ -438,14 +475,12 @@ with tabs[7]:
         top_margin_product,
         worst_margin_product,
     )
-
-        
+     
 with tabs[8]:
     render_finance(
         monthly,
         current_total,
     )
-
 
 with tabs[9]:
     render_advanced_bi(
