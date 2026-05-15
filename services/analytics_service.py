@@ -82,3 +82,19 @@ def monthly_sales(df: pd.DataFrame) -> pd.DataFrame:
     )
 
     return monthly
+
+def top_share(df: pd.DataFrame, column: str) -> tuple[str, float]:
+    grouped = (
+        df.groupby(column, as_index=False)["Receita"]
+        .sum()
+        .sort_values("Receita", ascending=False)
+    )
+
+    if grouped.empty:
+        return "Sem dados", 0
+
+    top_name = grouped.iloc[0][column]
+    total = grouped["Receita"].sum()
+    share = grouped.iloc[0]["Receita"] / total * 100 if total else 0
+
+    return str(top_name), share
